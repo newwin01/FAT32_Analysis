@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <vector>
 
 #include "byte_buffer.hpp"
 
@@ -238,7 +239,7 @@ Node* to_node (DirEntry *dir, Superblock *superblock, FATArea *fatArea) {
     node->extents.insert( pair<int, int> (physical_addr, dir->getFileSize() ));
   else if (dir->isDir()) { 
     node->extents.insert( pair<int, int> (physical_addr, dir->getFileSize())) ;
-    node->DirList.push_back(node->name);
+    // node->DirList.push_back(node->name);
   }
 
   return node;
@@ -253,7 +254,7 @@ class Fat32{
     
   public:
     Fat32(string filename);
-    void processFile(Node* node, Node* new_node, fstream &ifs) ;
+    void processFile(Node* node, fstream &ifs) ;
     void processDirectoryRecursively(Node *node, fstream &ifs) ;
     void processDeleteFile(Node* node, fstream &ifs) ;
     void export_to(string filename, int dataLocation);
@@ -292,7 +293,7 @@ void Fat32::processDirectoryRecursively(Node *node, fstream &ifs) {
   map extents = node->extents;
 
   cout << node->name << endl;
-  dirList.push_back(dirList.back() + node->name);
+  // dirList.push_back(dirList.back() + node->name);
 
   for (std::map<int, int>::iterator it = extents.begin(); it != extents.end(); ++it) {
     physical_addr = it->first;
@@ -305,11 +306,11 @@ void Fat32::processDirectoryRecursively(Node *node, fstream &ifs) {
       ifs.seekg(physical_addr + j);
       ifs.read(dirBuf, 0x20);
 
-      DirEntry* subDirEntry = new DirEntry(dirBuf, 0, 0x20);
-      Node* new_node = to_node(subDirEntry, superblock, fatArea);
+      DirEntry *subDirEntry = new DirEntry(dirBuf, 0, 0x20);
+      Node *node = to_node(subDirEntry, superblock, fatArea);
 
       if (node->isFile()) {
-          processFile(node, new_node, ifs);
+          processFile(node, ifs);
           delete subDirEntry;
       } 
       else if (node->isDir()) {
@@ -323,7 +324,7 @@ void Fat32::processDirectoryRecursively(Node *node, fstream &ifs) {
 
 }
 
-void Fat32::processFile(Node* node, Node* new_node, fstream &ifs) {
+void Fat32::processFile(Node* node, fstream &ifs) {
 
   int physical_addr;
     int size;
@@ -369,7 +370,7 @@ Fat32::Fat32(string filename) {
 
   fatArea = new FATArea(fat_buffer, 0, superblock->get_fat_area_size());
 
-  dirList.push_back("/");
+  // dirList.push_back("/");
 
   char root_dir[0x20];
 
