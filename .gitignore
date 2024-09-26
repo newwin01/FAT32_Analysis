@@ -7,3 +7,6 @@
 !README.md
 !.gitignore
 !CMakeLists.txt
+!result
+!*.jpg
+!*.py
